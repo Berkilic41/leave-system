@@ -1,0 +1,61 @@
+@model TeamCalendarViewModel
+@{
+    ViewData["Title"] = "Team calendar";
+    var monthEnd = Model.Month.AddMonths(1).AddDays(-1);
+    int daysInMonth = monthEnd.Day;
+    var today = DateTime.UtcNow.Date;
+    var team = Model.Team.ToList();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Team calendar — @Model.Month.ToString("MMMM yyyy")</h1>
+    <div class="btn-group">
+        <a class="btn btn-sm btn-outline-secondary" asp-action="Calendar" asp-route-month="@Model.Month.AddMonths(-1).ToString("yyyy-MM-dd")">← Prev</a>
+        <a class="btn btn-sm btn-outline-secondary" asp-action="Calendar" asp-route-month="@DateTime.UtcNow.Date.ToString("yyyy-MM-dd")">Today</a>
+        <a class="btn btn-sm btn-outline-secondary" asp-action="Calendar" asp-route-month="@Model.Month.AddMonths(1).ToString("yyyy-MM-dd")">Next →</a>
+    </div>
+</div>
+
+@if (!team.Any())
+{
+    <div class="text-center text-muted py-5">No direct or indirect reports.</div>
+}
+else
+{
+    <div class="card-section p-2">
+        <div class="cal" style="grid-template-columns: 180px repeat(@daysInMonth, minmax(28px, 1fr));">
+            <div class="cal-header"></div>
+            @for (int d = 1; d <= daysInMonth; d++)
+            {
+                var day = new DateTime(Model.Month.Year, Model.Month.Month, d);
+                var isWeekend = day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+                var isToday = day == today;
+                var classes = "cal-header" + (isWeekend ? " weekend" : "") + (isToday ? " today" : "");
+                <div class="@classes">@d</div>
+            }
+
+            @foreach (var emp in team)
+            {
+                <div class="cal-emp">@emp.FullName<br /><small class="text-muted fw-normal">@emp.DepartmentName</small></div>
+                @for (int d = 1; d <= daysInMonth; d++)
+                {
+                    var day = new DateTime(Model.Month.Year, Model.Month.Month, d);
+                    var leaves = Model.ApprovedLeaves.Where(l => l.EmployeeId == emp.Id && l.StartDate <= day && l.EndDate >= day).ToList();
+                    <div class="cal-cell">
+                        @foreach (var leave in leaves)
+                        {
+                            <div class="cal-leave leave-@leave.LeaveTypeName" title="@leave.LeaveTypeName: @leave.StartDate.ToString("MMM d") - @leave.EndDate.ToString("MMM d")">
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="d-flex gap-3 mt-3 small">
+        <span><span class="cal-leave leave-Annual" style="position:static;display:inline-block;width:14px;height:14px;border-radius:3px"></span> Annual</span>
+        <span><span class="cal-leave leave-Sick" style="position:static;display:inline-block;width:14px;height:14px;border-radius:3px"></span> Sick</span>
+        <span><span class="cal-leave leave-Unpaid" style="position:static;display:inline-block;width:14px;height:14px;border-radius:3px"></span> Unpaid</span>
+    </div>
+}
