@@ -1,22 +1,28 @@
-html {
-  font-size: 14px;
-}
+html { font-size: 14px; }
+@media (min-width: 768px) { html { font-size: 15px; } }
+body { background: #f1f5f9; }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
+.card-section { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
+.balance-card { background: linear-gradient(135deg, #0891b2, #0e7490); color: #fff; border-radius: 12px; padding: 1.25rem; }
+.balance-card .label { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; opacity: .85; }
+.balance-card .value { font-size: 2rem; font-weight: 700; }
+.balance-card.unpaid { background: linear-gradient(135deg, #475569, #334155); }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
+.status-badge { padding: .15em .55em; border-radius: 999px; font-size: .75rem; font-weight: 600; }
+.status-Pending   { background: #fef3c7; color: #92400e; }
+.status-Approved  { background: #dcfce7; color: #166534; }
+.status-Rejected  { background: #fee2e2; color: #991b1b; }
+.status-Cancelled { background: #f1f5f9; color: #64748b; }
 
-body {
-  margin-bottom: 60px;
-}
+/* Team calendar grid: 1 header column + 1 row per employee, 1 column per day */
+.cal { display: grid; gap: 1px; background: #e2e8f0; border-radius: 12px; overflow: hidden; }
+.cal-cell { background: #fff; padding: .35rem .25rem; min-height: 38px; font-size: .75rem; position: relative; }
+.cal-header { background: #f8fafc; font-weight: 600; text-align: center; }
+.cal-header.weekend { background: #e2e8f0; color: #64748b; }
+.cal-header.today   { background: #cffafe; color: #0e7490; }
+.cal-leave { position: absolute; left: 0; right: 0; top: 4px; bottom: 4px; border-radius: 4px; padding: 2px 4px; overflow: hidden; }
+.leave-Annual  { background: #bfdbfe; color: #1e3a8a; }
+.leave-Sick    { background: #fecaca; color: #991b1b; }
+.leave-Unpaid  { background: #ddd6fe; color: #4c1d95; }
+.cal-emp { background: #fff; padding: .35rem .75rem; font-size: .85rem; font-weight: 600; }

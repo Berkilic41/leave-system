@@ -1,31 +1,37 @@
-using System.Diagnostics;
+using System.Security.Claims;
+using LeaveSystem.Bll.Services.Interfaces;
+using LeaveSystem.Web.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using LeaveSystem.Web.Models;
 
 namespace LeaveSystem.Web.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly IEmployeeService _employees;
+    private readonly ILeaveRequestService _leave;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(IEmployeeService employees, ILeaveRequestService leave)
     {
-        _logger = logger;
+        _employees = employees;
+        _leave = leave;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
-    }
+        if (User.IsInRole("HR")) return RedirectToAction("Index", "Hr");
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+        var empId = int.Parse(User.FindFirstValue("EmployeeId")!);
+        var employee = await _employees.GetByIdAsync(empId);
+        if (employee is null) return Unauthorized();
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return View(new HomeViewModel
+        {
+            Employee = employee,
+            Year = DateTime.UtcNow.Year,
+            Balance = await _leave.GetBalanceAsync(empId, DateTime.UtcNow.Year),
+            RecentRequests = (await _leave.GetForEmployeeAsync(empId)).Take(10)
+        });
     }
 }
