@@ -20,7 +20,9 @@ BEGIN
         lt.Id              AS LeaveTypeId,
         lt.Name            AS LeaveTypeName,
         lt.IsPaid,
-        ISNULL(q.AnnualDays, lt.DefaultAnnualQuota) AS AnnualDays,
+        ISNULL((SELECT q.AnnualDays FROM LeaveQuotas q
+                WHERE q.EmployeeId = @EmployeeId AND q.LeaveTypeId = lt.Id AND q.[Year] = @Year),
+               lt.DefaultAnnualQuota) AS AnnualDays,
         ISNULL((
             SELECT SUM(DATEDIFF(DAY, lr.StartDate, lr.EndDate) + 1)
             FROM LeaveRequests lr
