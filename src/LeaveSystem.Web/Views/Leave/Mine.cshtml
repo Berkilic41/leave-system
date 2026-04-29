@@ -1,0 +1,46 @@
+@model IEnumerable<LeaveRequest>
+@{
+    ViewData["Title"] = "My leaves";
+    var balance = ViewBag.Balance as IEnumerable<LeaveBalanceRow> ?? [];
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">My leave requests</h1>
+    <a asp-action="Create" class="btn btn-primary">+ New request</a>
+</div>
+
+<div class="row g-3 mb-4">
+    @foreach (var b in balance)
+    {
+        <div class="col-md-4">
+            <div class="balance-card @(b.IsPaid ? "" : "unpaid")">
+                <div class="label">@b.LeaveTypeName</div>
+                <div class="value">@b.Remaining <small style="font-size:1rem;font-weight:400;opacity:.7">/ @b.AnnualDays</small></div>
+                <div class="small">Used @b.UsedDays · Pending @b.PendingDays</div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="card-section p-0">
+    <table class="table mb-0 align-middle">
+        <thead class="table-light"><tr><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr><td colspan="6" class="text-center text-muted py-4">No requests yet.</td></tr>
+            }
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.LeaveTypeName</td>
+                    <td>@r.StartDate.ToString("MMM d, yyyy")</td>
+                    <td>@r.EndDate.ToString("MMM d, yyyy")</td>
+                    <td>@r.Days</td>
+                    <td><span class="status-badge status-@r.Status">@r.Status</span></td>
+                    <td><a asp-action="Details" asp-route-id="@r.Id" class="btn btn-sm btn-outline-secondary">View</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

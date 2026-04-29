@@ -1,0 +1,46 @@
+@model LeaveRequest
+@{
+    ViewData["Title"] = $"Leave request #{Model.Id}";
+    var empId = int.Parse(User.FindFirst("EmployeeId")!.Value);
+}
+
+<a asp-action="Mine" class="text-muted small text-decoration-none">← Back</a>
+
+<div class="card-section mt-2">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h4 mb-1">Leave request #@Model.Id</h1>
+            <p class="text-muted mb-0">@Model.EmployeeName · @Model.DepartmentName</p>
+        </div>
+        <span class="status-badge status-@Model.Status">@Model.Status</span>
+    </div>
+
+    <dl class="row mb-0">
+        <dt class="col-sm-3">Type</dt>     <dd class="col-sm-9">@Model.LeaveTypeName</dd>
+        <dt class="col-sm-3">From</dt>     <dd class="col-sm-9">@Model.StartDate.ToString("dddd, MMM d yyyy")</dd>
+        <dt class="col-sm-3">To</dt>       <dd class="col-sm-9">@Model.EndDate.ToString("dddd, MMM d yyyy") <span class="text-muted">(@Model.Days day(s))</span></dd>
+        @if (!string.IsNullOrEmpty(Model.Reason))
+        {
+            <dt class="col-sm-3">Reason</dt>   <dd class="col-sm-9">@Model.Reason</dd>
+        }
+        <dt class="col-sm-3">Submitted</dt><dd class="col-sm-9 text-muted small">@Model.CreatedAt.ToString("MMM d, HH:mm")</dd>
+        @if (Model.DecidedAt.HasValue)
+        {
+            <dt class="col-sm-3">Decided</dt> <dd class="col-sm-9">@Model.DecidedAt.Value.ToString("MMM d, HH:mm") by @Model.DecidedByName</dd>
+            @if (!string.IsNullOrEmpty(Model.DecisionNote))
+            {
+                <dt class="col-sm-3">Note</dt>   <dd class="col-sm-9">@Model.DecisionNote</dd>
+            }
+        }
+    </dl>
+
+    @if (Model.Status == "Pending" && Model.EmployeeId == empId)
+    {
+        <hr />
+        <form asp-action="Cancel" method="post" onsubmit="return confirm('Cancel this request?')">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button class="btn btn-outline-danger">Cancel request</button>
+        </form>
+    }
+</div>
