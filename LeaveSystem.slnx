@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LeaveSystem.Bll/LeaveSystem.Bll.csproj" />
+    <Project Path="src/LeaveSystem.Data/LeaveSystem.Data.csproj" />
+    <Project Path="src/LeaveSystem.Web/LeaveSystem.Web.csproj" />
+  </Folder>
+</Solution>
