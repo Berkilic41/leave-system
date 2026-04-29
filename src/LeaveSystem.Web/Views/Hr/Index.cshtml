@@ -1,0 +1,72 @@
+@model HrDashboardViewModel
+@{ ViewData["Title"] = "HR dashboard"; }
+
+<h1 class="h3 mb-4">HR dashboard</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card-section"><div class="text-muted small">Employees</div><div class="h2 mb-0">@Model.Data.TotalEmployees</div></div></div>
+    <div class="col-md-3"><div class="card-section"><div class="text-muted small">Departments</div><div class="h2 mb-0">@Model.Data.TotalDepartments</div></div></div>
+    <div class="col-md-3"><div class="card-section @(Model.Data.PendingRequests > 0 ? "border-start border-warning border-4" : "")"><div class="text-muted small">Pending requests</div><div class="h2 mb-0 @(Model.Data.PendingRequests > 0 ? "text-warning" : "")">@Model.Data.PendingRequests</div></div></div>
+    <div class="col-md-3"><div class="card-section @(Model.Data.OnLeaveToday.Any() ? "border-start border-info border-4" : "")"><div class="text-muted small">On leave today</div><div class="h2 mb-0">@Model.Data.OnLeaveToday.Count</div></div></div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card-section">
+            <h2 class="h5 mb-3">Headcount by department</h2>
+            <table class="table mb-0 align-middle">
+                <thead><tr><th>Department</th><th class="text-end">Employees</th></tr></thead>
+                <tbody>
+                    @foreach (var d in Model.Data.Headcount)
+                    {
+                        <tr><td>@d.Name</td><td class="text-end"><strong>@d.Headcount</strong></td></tr>
+                    }
+                </tbody>
+                <tfoot class="table-light">
+                    <tr><th>Total</th><th class="text-end">@Model.Data.Headcount.Sum(x => x.Headcount)</th></tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card-section">
+            <h2 class="h5 mb-3">Leave usage — @DateTime.UtcNow.Year</h2>
+            <table class="table mb-0 align-middle">
+                <thead><tr><th>Type</th><th class="text-end">Approved requests</th><th class="text-end">Total days</th></tr></thead>
+                <tbody>
+                    @foreach (var u in Model.Data.Usage)
+                    {
+                        <tr><td><strong>@u.Name</strong></td><td class="text-end">@u.RequestCount</td><td class="text-end">@u.TotalDays</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card-section mt-3">
+    <h2 class="h5 mb-3">On leave today</h2>
+    @if (!Model.Data.OnLeaveToday.Any())
+    {
+        <p class="text-muted mb-0">Everyone is in. ✅</p>
+    }
+    else
+    {
+        <table class="table mb-0 align-middle">
+            <thead><tr><th>Employee</th><th>Department</th><th>Leave type</th><th>From</th><th>To</th></tr></thead>
+            <tbody>
+                @foreach (var e in Model.Data.OnLeaveToday)
+                {
+                    <tr>
+                        <td><strong>@e.FullName</strong></td>
+                        <td>@e.DepartmentName</td>
+                        <td>@e.Position</td>
+                        <td>@e.HireDate.ToString("MMM d")</td>
+                        <td>@e.ManagerName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
