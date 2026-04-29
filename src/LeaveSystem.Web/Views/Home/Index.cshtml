@@ -1,0 +1,50 @@
+@model HomeViewModel
+@{ ViewData["Title"] = "My page"; }
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h1 class="h3 mb-1">Welcome, @Model.Employee.FullName</h1>
+        <p class="text-muted mb-0">@Model.Employee.Position · @Model.Employee.DepartmentName · joined @Model.Employee.HireDate.ToString("MMM yyyy")</p>
+    </div>
+    <a asp-controller="Leave" asp-action="Create" class="btn btn-primary">+ Request leave</a>
+</div>
+
+<h2 class="h5 mb-3">Leave balance — @Model.Year</h2>
+<div class="row g-3 mb-4">
+    @foreach (var b in Model.Balance)
+    {
+        <div class="col-md-4">
+            <div class="balance-card @(b.IsPaid ? "" : "unpaid")">
+                <div class="label">@b.LeaveTypeName</div>
+                <div class="value">@b.Remaining <small style="font-size:1rem;font-weight:400;opacity:.7">/ @b.AnnualDays days</small></div>
+                <div class="small">Used @b.UsedDays · Pending @b.PendingDays</div>
+            </div>
+        </div>
+    }
+</div>
+
+<h2 class="h5 mb-3">Recent requests</h2>
+<div class="card-section p-0">
+    <table class="table mb-0 align-middle">
+        <thead class="table-light">
+            <tr><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th>Decided by</th></tr>
+        </thead>
+        <tbody>
+            @if (!Model.RecentRequests.Any())
+            {
+                <tr><td colspan="6" class="text-center text-muted py-4">No leave requests yet.</td></tr>
+            }
+            @foreach (var r in Model.RecentRequests)
+            {
+                <tr>
+                    <td>@r.LeaveTypeName</td>
+                    <td>@r.StartDate.ToString("MMM d, yyyy")</td>
+                    <td>@r.EndDate.ToString("MMM d, yyyy")</td>
+                    <td>@r.Days</td>
+                    <td><span class="status-badge status-@r.Status">@r.Status</span></td>
+                    <td class="text-muted small">@r.DecidedByName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

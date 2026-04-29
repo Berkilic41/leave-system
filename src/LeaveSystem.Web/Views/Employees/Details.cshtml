@@ -1,0 +1,74 @@
+@model Employee
+@{
+    ViewData["Title"] = Model.FullName;
+    var balance = ViewBag.Balance as IEnumerable<LeaveBalanceRow> ?? [];
+    var requests = ViewBag.Requests as IEnumerable<LeaveRequest> ?? [];
+    var audit = ViewBag.Audit as IEnumerable<AuditEntry> ?? [];
+}
+
+<a asp-action="Index" class="text-muted small text-decoration-none">← All employees</a>
+
+<div class="card-section mt-2 mb-3">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h1 class="h3 mb-1">@Model.FullName</h1>
+            <p class="text-muted mb-1">@Model.Position · @Model.DepartmentName</p>
+            <p class="mb-0 small">Joined @Model.HireDate.ToString("MMM d, yyyy") · Manager: @(Model.ManagerName ?? "—") · Role: @Model.Role</p>
+            <p class="mb-0 small text-muted">@Model.Email</p>
+        </div>
+        @if (User.IsInRole("HR"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+        }
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <h2 class="h5 mb-3">Leave history</h2>
+        <div class="card-section p-0">
+            <table class="table mb-0 align-middle">
+                <thead class="table-light"><tr><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th></tr></thead>
+                <tbody>
+                    @if (!requests.Any()) { <tr><td colspan="5" class="text-center text-muted py-3">No leave requests.</td></tr> }
+                    @foreach (var r in requests)
+                    {
+                        <tr>
+                            <td>@r.LeaveTypeName</td>
+                            <td>@r.StartDate.ToString("MMM d, yyyy")</td>
+                            <td>@r.EndDate.ToString("MMM d, yyyy")</td>
+                            <td>@r.Days</td>
+                            <td><span class="status-badge status-@r.Status">@r.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <h2 class="h5 mb-3">Balance — @DateTime.UtcNow.Year</h2>
+        <div class="card-section">
+            @foreach (var b in balance)
+            {
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <span><strong>@b.LeaveTypeName</strong>@(b.IsPaid ? "" : " (unpaid)")</span>
+                    <span class="text-muted">@b.Remaining / @b.AnnualDays</span>
+                </div>
+            }
+        </div>
+
+        @if (audit.Any())
+        {
+            <h2 class="h6 mt-4 mb-2">Profile changes</h2>
+            <div class="card-section small">
+                @foreach (var a in audit.Take(8))
+                {
+                    <div class="border-bottom py-1">
+                        <strong>@a.Action</strong> by @a.ActorName
+                        <div class="text-muted">@a.Timestamp.ToString("MMM d, HH:mm") · @a.OldValue → @a.NewValue</div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

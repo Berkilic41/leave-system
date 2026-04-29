@@ -1,0 +1,44 @@
+@model IEnumerable<Employee>
+@{
+    ViewData["Title"] = "Employees";
+    var depts = ViewBag.Departments as IEnumerable<Department> ?? [];
+    int? selectedDept = ViewBag.DepartmentId as int?;
+    var search = ViewBag.Search as string;
+}
+
+<h1 class="h3 mb-3">Employees</h1>
+
+<form method="get" class="card-section mb-3">
+    <div class="row g-2">
+        <div class="col-md-6"><input name="search" value="@search" class="form-control" placeholder="Search by name or position..." /></div>
+        <div class="col-md-4">
+            <select name="departmentId" class="form-select">
+                <option value="">All departments</option>
+                @foreach (var d in depts)
+                {
+                    <option value="@d.Id" selected="@(selectedDept == d.Id)">@d.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2"><button class="btn btn-outline-secondary w-100">Filter</button></div>
+    </div>
+</form>
+
+<div class="card-section p-0">
+    <table class="table mb-0 align-middle">
+        <thead class="table-light"><tr><th>Name</th><th>Department</th><th>Position</th><th>Manager</th><th>Joined</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var e in Model)
+            {
+                <tr>
+                    <td><a asp-action="Details" asp-route-id="@e.Id" class="text-decoration-none"><strong>@e.FullName</strong></a><div class="text-muted small">@e.Email</div></td>
+                    <td>@e.DepartmentName</td>
+                    <td>@e.Position</td>
+                    <td class="text-muted">@(e.ManagerName ?? "—")</td>
+                    <td class="text-muted small">@e.HireDate.ToString("MMM d, yyyy")</td>
+                    <td><a asp-action="Details" asp-route-id="@e.Id" class="btn btn-sm btn-outline-secondary">View</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
