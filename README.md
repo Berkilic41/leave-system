@@ -1,6 +1,24 @@
 # Employee & Leave Management System
 
+[![CI](https://github.com/Berkilic41/leave-system/actions/workflows/ci.yml/badge.svg)](https://github.com/Berkilic41/leave-system/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/)
+
 Multi-role HR system built with ASP.NET Core MVC (.NET 8), SQL Server, and ADO.NET (no ORM). Three-layer architecture: `LeaveSystem.Data` → `LeaveSystem.Bll` → `LeaveSystem.Web`. Built across **feature branches** to demonstrate a real git workflow.
+
+## Why I Built This
+
+Leave management is a daily workflow in every organisation, yet it's surprisingly hard to model correctly: managers approve only their team's requests, teams can span multiple hierarchy levels, and the same employee can be both a Manager and a subordinate. I built this system to tackle **recursive organisational hierarchy**, concurrency-safe approvals, and SOLID service design — problems I encounter regularly in enterprise backend work.
+
+## 🔑 Technical Highlights
+
+- **Recursive team hierarchy** — `sp_GetTeamHierarchy` (recursive CTE) resolves multi-level manager chains; managers approve all direct and indirect reports
+- **Concurrency-safe decisions** — `sp_DecideLeaveRequest` runs with `UPDLOCK/HOLDLOCK` to prevent two managers simultaneously approving the same request
+- **SOLID refactor** — Decomposed a 186-line `Services.cs` mega-file into 7 single-responsibility service classes (AuthService, LeaveRequestService, EmployeeService, …)
+- **35+ unit tests** — LeaveRequestService (balance checks, team-scope authorization), AuthService, Manager service layer (xUnit + Moq)
+- **Integration tests** — `WebApplicationFactory` verifying role-based redirects for Employee/Manager/HR routes
+- **CI/CD** — GitHub Actions with test coverage upload
+- **Containerized** — Multi-stage Dockerfile + docker-compose with SQL Server 2022
 
 ---
 
