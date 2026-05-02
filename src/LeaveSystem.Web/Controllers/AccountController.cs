@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace LeaveSystem.Web.Controllers;
 
@@ -17,6 +18,7 @@ public class AccountController : Controller
     public IActionResult Login(string? returnUrl) => View(new LoginViewModel { ReturnUrl = returnUrl });
 
     [HttpPost, ValidateAntiForgeryToken]
+    [EnableRateLimiting("auth")]
     public async Task<IActionResult> Login(LoginViewModel vm)
     {
         if (!ModelState.IsValid) return View(vm);

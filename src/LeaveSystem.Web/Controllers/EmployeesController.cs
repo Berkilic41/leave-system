@@ -22,6 +22,7 @@ public class EmployeesController : Controller
         _leave = leave;
     }
 
+    [Authorize(Roles = "HR,Manager")]
     public async Task<IActionResult> Index(int? departmentId, string? search)
     {
         ViewBag.DepartmentId = departmentId;
@@ -30,6 +31,7 @@ public class EmployeesController : Controller
         return View(await _employees.GetAllAsync(departmentId, search));
     }
 
+    [Authorize(Roles = "HR,Manager")]
     public async Task<IActionResult> Details(int id)
     {
         var employee = await _employees.GetByIdAsync(id);

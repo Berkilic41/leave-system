@@ -10,7 +10,7 @@ namespace LeaveSystem.Web.Controllers;
 public class LeaveController : Controller
 {
     private readonly ILeaveRequestService _leave;
-    private readonly ILeaveTypeService _types;
+    private readonly ILeaveTypeService    _types;
 
     public LeaveController(ILeaveRequestService leave, ILeaveTypeService types)
     {
@@ -18,8 +18,8 @@ public class LeaveController : Controller
         _types = types;
     }
 
-    private int CurrentUserId  => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-    private int CurrentEmpId   => int.Parse(User.FindFirstValue("EmployeeId")!);
+    private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    private int CurrentEmpId  => int.Parse(User.FindFirstValue("EmployeeId")!);
 
     public async Task<IActionResult> Mine()
     {
@@ -30,10 +30,15 @@ public class LeaveController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
+        // Fetch leave types and balance in parallel — independent queries
+        var typesTask   = _types.GetAllAsync();
+        var balanceTask = _leave.GetBalanceAsync(CurrentEmpId, DateTime.UtcNow.Year);
+        await Task.WhenAll(typesTask, balanceTask);
+
         return View(new LeaveRequestFormViewModel
         {
-            LeaveTypes = await _types.GetAllAsync(),
-            Balance = await _leave.GetBalanceAsync(CurrentEmpId, DateTime.UtcNow.Year)
+            LeaveTypes = typesTask.Result,
+            Balance    = balanceTask.Result
         });
     }
 
@@ -42,8 +47,11 @@ public class LeaveController : Controller
     {
         if (!ModelState.IsValid)
         {
-            vm.LeaveTypes = await _types.GetAllAsync();
-            vm.Balance = await _leave.GetBalanceAsync(CurrentEmpId, DateTime.UtcNow.Year);
+            var typesTask   = _types.GetAllAsync();
+            var balanceTask = _leave.GetBalanceAsync(CurrentEmpId, DateTime.UtcNow.Year);
+            await Task.WhenAll(typesTask, balanceTask);
+            vm.LeaveTypes = typesTask.Result;
+            vm.Balance    = balanceTask.Result;
             return View(vm);
         }
         try
@@ -55,8 +63,11 @@ public class LeaveController : Controller
         catch (Exception ex)
         {
             ModelState.AddModelError("", ex.Message);
-            vm.LeaveTypes = await _types.GetAllAsync();
-            vm.Balance = await _leave.GetBalanceAsync(CurrentEmpId, DateTime.UtcNow.Year);
+            var typesTask   = _types.GetAllAsync();
+            var balanceTask = _leave.GetBalanceAsync(CurrentEmpId, DateTime.UtcNow.Year);
+            await Task.WhenAll(typesTask, balanceTask);
+            vm.LeaveTypes = typesTask.Result;
+            vm.Balance    = balanceTask.Result;
             return View(vm);
         }
     }
@@ -66,8 +77,8 @@ public class LeaveController : Controller
         var request = await _leave.GetByIdAsync(id);
         if (request is null) return NotFound();
 
-        bool isOwner = request.EmployeeId == CurrentEmpId;
-        bool authorized = isOwner || User.IsInRole("HR") || User.IsInRole("Manager");
+        bool authorized = request.EmployeeId == CurrentEmpId
+            || User.IsInRole("HR") || User.IsInRole("Manager");
         if (!authorized) return Forbid();
 
         return View(request);

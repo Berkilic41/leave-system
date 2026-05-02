@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LeaveSystem.Bll\LeaveSystem.Bll.csproj" />
     <ProjectReference Include="..\LeaveSystem.Data\LeaveSystem.Data.csproj" />
   </ItemGroup>
